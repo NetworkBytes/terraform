@@ -24,7 +24,9 @@ resource "vsphere_virtual_machine" "web" {
   }
 
   disk {
-    template = "centos-7"
+    template {
+      label = "centos-7"
+    }
   }
 }
 ```
@@ -49,7 +51,8 @@ The following arguments are supported:
 * `boot_delay` - (Optional) Time in seconds to wait for machine network to be ready.
 * `custom_configuration_parameters` - (Optional) Map of values that is set as virtual machine custom configurations.
 
-The `network_interface` block supports:
+<a id="network-interfaces"></a>
+## Network interfaces
 
 * `label` - (Required) Label to assign to this network interface
 * `ipv4_address` - (Optional) Static IP to assign to this network interface. Interface will use DHCP if this is left blank. Currently only IPv4 IP addresses are supported.
@@ -61,13 +64,20 @@ removed in a future version:
 * `ip_address` - __Deprecated, please use `ipv4_address` instead_.
 * `subnet_mask` - __Deprecated, please use `ipv4_prefix_length` instead_.
 
+<a id="disks"></a>
+## Disks
 
-The `disk` block supports:
-
-* `template` - (Required if size not provided) Template for this disk.
+* `template` - (Required if `size` is not provided) Template for this disk; see [Templates](#templates) below for details.
 * `datastore` - (Optional) Datastore for this disk
 * `size` - (Required if template not provided) Size of this disk (in GB).
 * `iops` - (Optional) Number of virtual iops to allocate for this disk.
+
+<a id="templates"></a>
+## Templates
+
+* `label` - (Required) The template label (label of the virtual machine/template to clone from).
+* `linked` - (Optional) Set to true if this should be a linked clone. Linked cloning requires the source virtual machine/template to have at least one existing snapshot which can be cloned from. Defaults to false.
+* `snapshot` - (Optional) This is silently ignored if `linked` is false. Linked clones are, by default, cloned from the latest snapshot. However, here you can specify the label of the snapshot you want to clone from.
 
 ## Attributes Reference
 

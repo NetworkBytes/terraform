@@ -81,6 +81,29 @@ type Resource struct {
 	Lifecycle    ResourceLifecycle
 }
 
+// Copy returns a copy of this Resource. Helpful for avoiding shared
+// config pointers across multiple pieces of the graph that need to do
+// interpolation.
+func (r *Resource) Copy() *Resource {
+	n := &Resource{
+		Name:         r.Name,
+		Type:         r.Type,
+		RawCount:     r.RawCount.Copy(),
+		RawConfig:    r.RawConfig.Copy(),
+		Provisioners: make([]*Provisioner, 0, len(r.Provisioners)),
+		Provider:     r.Provider,
+		DependsOn:    make([]string, 0, len(r.DependsOn)),
+		Lifecycle:    r.Lifecycle,
+	}
+	for _, p := range r.Provisioners {
+		n.Provisioners = append(n.Provisioners, p.Copy())
+	}
+	for _, d := range r.DependsOn {
+		n.DependsOn = append(n.DependsOn, d)
+	}
+	return n
+}
+
 // ResourceLifecycle is used to store the lifecycle tuning parameters
 // to allow customized behavior
 type ResourceLifecycle struct {
@@ -94,6 +117,15 @@ type Provisioner struct {
 	Type      string
 	RawConfig *RawConfig
 	ConnInfo  *RawConfig
+}
+
+// Copy returns a copy of this Provisioner
+func (p *Provisioner) Copy() *Provisioner {
+	return &Provisioner{
+		Type:      p.Type,
+		RawConfig: p.RawConfig.Copy(),
+		ConnInfo:  p.ConnInfo.Copy(),
+	}
 }
 
 // Variable is a variable defined within the configuration.
